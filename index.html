@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniMax H3 生态笔记</title>
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --ink:#16181d;
+    --ink-2:#565c68;
+    --ink-3:#8b929e;
+    --line:#e7e9ee;
+    --brand:#2f6df6;
+    --warm:#e0a02a;
+    --ok:#1f9d63;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    padding:56px 24px 72px;
+  }
+  .wrap{max-width:920px;margin:0 auto}
+  header{margin-bottom:44px}
+  .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:12px}
+  h1{font-size:34px;line-height:1.25;letter-spacing:-.02em;font-weight:700}
+  h1 span{color:var(--brand)}
+  .lede{margin-top:14px;color:var(--ink-2);font-size:15px;max-width:600px}
+  .meta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  .chip{font-size:12px;color:var(--ink-2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;
+     margin:44px 0 16px;display:flex;align-items:center;gap:10px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:1fr;gap:10px}
+  .repo{
+    display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:15px 18px;text-decoration:none;color:inherit;
+    transition:border-color .18s,transform .18s,box-shadow .18s;
+  }
+  .repo:hover{border-color:#c9d7f7;transform:translateY(-1px);box-shadow:0 6px 20px rgba(47,109,246,.08)}
+  .repo .name{font-weight:600;font-size:15px;letter-spacing:-.01em}
+  .repo .desc{font-size:13px;color:var(--ink-2);margin-top:3px}
+  .stars{margin-left:auto;flex-shrink:0;font-size:13px;font-weight:600;color:var(--warm);
+         display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
+  .stars::before{content:"★";font-size:12px}
+  .badge{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;color:var(--brand);
+         background:#eef3fe;border-radius:6px;padding:3px 9px;letter-spacing:.02em}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 26px}
+  .panel + .panel{margin-top:12px}
+  .panel h3{font-size:15px;font-weight:600;margin-bottom:6px}
+  .panel p{font-size:14px;color:var(--ink-2)}
+  .vram{margin-top:26px}
+  .scale{position:relative;height:34px;margin-bottom:8px}
+  .track{position:absolute;top:13px;left:0;right:0;height:8px;background:#eceef3;border-radius:4px}
+  .zone{position:absolute;top:13px;height:8px;border-radius:4px;background:linear-gradient(90deg,#cfe0ff,#8fb4fb)}
+  .mark{position:absolute;top:0;font-size:11px;color:var(--ink-3);transform:translateX(-50%);white-space:nowrap}
+  .mark b{display:block;font-size:11px;color:var(--ink-2);font-weight:600}
+  .tick{position:absolute;top:9px;width:2px;height:16px;background:#c2c7d2;transform:translateX(-50%)}
+  .tick.on{background:var(--brand);height:26px;top:5px}
+  .legend{margin-top:14px;font-size:13px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:8px 18px}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:1px}
+  ul.plain{list-style:none;font-size:14px;color:var(--ink-2)}
+  ul.plain li{padding:7px 0;border-bottom:1px solid #f1f2f5;display:flex;gap:10px}
+  ul.plain li:last-child{border-bottom:0}
+  ul.plain b{color:var(--ink);font-weight:600;flex-shrink:0;min-width:132px}
+  footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--line);
+         font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid #d8dce4}
+  @media(min-width:720px){
+    .grid{grid-template-columns:1fr 1fr}
+    h1{font-size:42px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Open Weight · Video Generation</div>
+    <h1>MiniMax <span>H3</span> 生态笔记</h1>
+    <p class="lede">一个开放权重视频模型的周边生态：官方仓库、ComfyUI 节点、显存门槛与许可边界。数据取自 2026-11-08。</p>
+    <div class="meta">
+      <span class="chip">9 个仓库</span>
+      <span class="chip">原声音画同出</span>
+      <span class="chip">最长 15 秒 / 11 种语言</span>
+    </div>
+  </header>
+
+  <h2>一手来源</h2>
+  <div class="grid">
+    <a class="repo" href="https://github.com/MiniMax-AI/MiniMax-H3" target="_blank" rel="noopener">
+      <div>
+        <div class="name">MiniMax-AI / MiniMax-H3</div>
+        <div class="desc">官方开源主仓：权重、推理脚本、文档</div>
+      </div>
+      <div class="stars">11.6k</div>
+    </a>
+    <a class="repo" href="https://huggingface.co/MiniMaxAI/MiniMax-H3" target="_blank" rel="noopener">
+      <div>
+        <div class="name">MiniMaxAI / MiniMax-H3</div>
+        <div class="desc">HuggingFace 权重页，国内可用镜像替换域名</div>
+      </div>
+      <div class="badge">权重</div>
+    </a>
+    <a class="repo" href="https://platform.minimax.io" target="_blank" rel="noopener">
+      <div>
+        <div class="name">MiniMax 开放平台</div>
+        <div class="desc">官方 API、额度与控制台</div>
+      </div>
+      <div class="badge">API</div>
+    </a>
+  </div>
+
+  <h2>ComfyUI 生态</h2>
+  <div class="grid">
+    <a class="repo" href="https://github.com/seesee75-commits/ComfyUI-MiniMaxH3-Director" target="_blank" rel="noopener">
+      <div>
+        <div class="name">MiniMaxH3-Director</div>
+        <div class="desc">时间线分镜：逐镜提示词、首尾帧、参考素材</div>
+      </div>
+      <div class="stars">345</div>
+    </a>
+    <a class="repo" href="https://github.com/knoic/ComfyUI-MiniMaxH3-PrefixStream" target="_blank" rel="noopener">
+      <div>
+        <div class="name">MiniMaxH3-PrefixStream</div>
+        <div class="desc">长视频续写，显存只跟单段长度挂钩</div>
+      </div>
+      <div class="stars">216</div>
+    </a>
+    <a class="repo" href="https://github.com/Zironic/H3-Optimizations" target="_blank" rel="noopener">
+      <div>
+        <div class="name">H3-Optimizations</div>
+        <div class="desc">显存优化 + 稀疏注意力开关</div>
+      </div>
+      <div class="stars">183</div>
+    </a>
+    <a class="repo" href="https://github.com/sepiablue-ai/ComfyUI-MiniMax-H3-TaoMate-C3" target="_blank" rel="noopener">
+      <div>
+        <div class="name">TaoMate-C3</div>
+        <div class="desc">小显存档三步加速包（W4A4 + 稀疏）</div>
+      </div>
+      <div class="stars">41</div>
+    </a>
+    <a class="repo" href="https://github.com/entropicnoise/MiniMax-H3-Combined-Image-And-Reference-to-Video" target="_blank" rel="noopener">
+      <div>
+        <div class="name">Combined Ref to Video</div>
+        <div class="desc">首帧 + 参考图/视频/音频组合输入</div>
+      </div>
+      <div class="stars">11</div>
+    </a>
+    <a class="repo" href="https://github.com/Mozer/ComfyUI-MiniMax-H3-MotionCache-FastVAE" target="_blank" rel="noopener">
+      <div>
+        <div class="name">MotionCache-FastVAE</div>
+        <div class="desc">批量 Fast VAE 解码</div>
+      </div>
+      <div class="stars">13</div>
+    </a>
+  </div>
+
+  <h2>显存门槛</h2>
+  <div class="panel">
+    <h3>864 × 480 / 5 秒的实测区间</h3>
+    <p>pruned INT8 + NVFP4 权重组合下，峰值显存落在 26–32 GB。卡的余量决定你走不走流式分片。</p>
+    <div class="vram">
+      <div class="scale">
+        <div class="track"></div>
+        <div class="zone" style="left:0;width:50%"></div>
+        <div class="tick" style="left:37.5%"></div>
+        <div class="mark" style="left:37.5%;top:-14px">24 GB<b>能跑，需流式</b></div>
+        <div class="tick" style="left:50%"></div>
+        <div class="mark" style="left:50%;top:-14px">32 GB<b>贴上限</b></div>
+        <div class="tick on" style="left:75%"></div>
+        <div class="mark" style="left:75%;top:-14px">48 GB<b>宽裕</b></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#8fb4fb"></i>可用区间</span>
+        <span><i style="background:#c2c7d2"></i>显存档位（0–64 GB 比例）</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>许可边界</h2>
+  <div class="panel">
+    <h3>社区许可，不是 Apache 2.0</h3>
+    <ul class="plain">
+      <li><b>免费商用线</b>年收入 2000 万美元以下，且界面显著标注 MiniMax H3</li>
+      <li><b>需书面授权</b>超过该线，或在美 / 欧 / 英 / 韩部署</li>
+      <li><b>不受影响</b>个人创作与内容账号运营</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>数据快照 2026-11-08 · 仓库星数会变，结论看结构</span>
+    <a href="https://github.com/xiaoshui519/h3-notes" target="_blank" rel="noopener">在 GitHub 查看源文件</a>
+  </footer>
+
+</div>
+</body>
+</html>
